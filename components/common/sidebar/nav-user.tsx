@@ -1,19 +1,14 @@
 "use client";
 
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-} from "lucide-react";
+import { useCallback, useMemo, useTransition } from "react";
+import { ChevronsUpDown, LogOut } from "lucide-react";
 
+import { authClient } from "@/lib/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Spinner } from "@/components/ui/spinner";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -25,17 +20,85 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { redirect } from "next/navigation";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-}) {
+function getInitials(name?: string | null, email?: string | null) {
+  const source = name?.trim() || email?.trim();
+  if (!source) return "??";
+  const parts = source.split(/\s+/).slice(0, 2);
+  const initials = parts
+    .map((part) => part[0]?.toUpperCase())
+    .filter(Boolean)
+    .join("");
+  if (initials) {
+    return initials;
+  }
+  return source.slice(0, 2).toUpperCase();
+}
+
+export function NavUser() {
   const { isMobile } = useSidebar();
+  const { data, isPending } = authClient.useSession();
+  const [isSigningOut, startTransition] = useTransition();
+
+  const user = data?.user ?? null;
+
+  const avatarFallback = useMemo(
+    () => getInitials(user?.name, user?.email),
+    [user?.name, user?.email]
+  );
+
+  const handleSignOut = useCallback(() => {
+    startTransition(async () => {
+      try {
+        await authClient.signOut();
+        redirect("/auth/signin");
+      } catch (error) {
+        console.error("sign out error", error);
+      }
+    });
+  }, [startTransition]);
+
+  if (isPending && !user) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg" className="gap-2" disabled>
+            <Spinner />
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-medium">Loading session</span>
+              <span className="truncate text-xs text-muted-foreground">
+                Please wait...
+              </span>
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
+  }
+
+  if (!user) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg" asChild className="gap-2">
+            <a href="/auth/signin">
+              <Avatar className="h-8 w-8 rounded-lg">
+                <AvatarFallback className="rounded-lg">SI</AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">Sign in</span>
+                <span className="truncate text-xs text-muted-foreground">
+                  Access your account
+                </span>
+              </div>
+              <ChevronsUpDown className="ml-auto size-4 opacity-30" />
+            </a>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
+  }
 
   return (
     <SidebarMenu>
@@ -47,12 +110,21 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarImage
+                  src={user.image ?? undefined}
+                  alt={user.name ?? user.email ?? "User avatar"}
+                />
+                <AvatarFallback className="rounded-lg">
+                  {avatarFallback}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate font-medium">
+                  {user.name ?? "Your account"}
+                </span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {user.email ?? "Signed in"}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -66,41 +138,35 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarImage
+                    src={user.image ?? undefined}
+                    alt={user.name ?? user.email ?? "User avatar"}
+                  />
+                  <AvatarFallback className="rounded-lg">
+                    {avatarFallback}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate font-medium">
+                    {user.name ?? "Your account"}
+                  </span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {user.email ?? "Signed in"}
+                  </span>
                 </div>
               </div>
             </DropdownMenuLabel>
-            {/* <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup> */}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
+            <DropdownMenuItem
+              onSelect={(event) => {
+                event.preventDefault();
+                handleSignOut();
+              }}
+              disabled={isSigningOut}
+              className="gap-2"
+            >
+              {isSigningOut ? <Spinner className="size-4" /> : <LogOut />}
+              {isSigningOut ? "Signing out..." : "Log out"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
