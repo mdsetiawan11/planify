@@ -1,7 +1,21 @@
 "use client";
 
-import { useCallback, useMemo, useTransition } from "react";
-import { ChevronsUpDown, LogOut } from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
+import {
+  ChevronsUpDown,
+  LogOut,
+  Sun,
+  Moon,
+  Monitor,
+  Check,
+} from "lucide-react";
+import { useTheme } from "next-themes";
 
 import { authClient } from "@/lib/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -58,6 +72,14 @@ export function NavUser() {
       }
     });
   }, [startTransition]);
+
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Avoid hydration mismatch: only render theme controls on client after mount
+    setMounted(true);
+  }, []);
 
   if (isPending && !user) {
     return (
@@ -157,6 +179,52 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+
+            {/* Theme switcher (uses next-themes) */}
+            <DropdownMenuItem
+              onSelect={(event) => {
+                event.preventDefault();
+                setTheme("light");
+              }}
+              className="gap-2"
+            >
+              <Sun />
+              <span>Light</span>
+              {mounted && theme === "light" ? (
+                <Check className="ml-auto size-4" />
+              ) : null}
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onSelect={(event) => {
+                event.preventDefault();
+                setTheme("dark");
+              }}
+              className="gap-2"
+            >
+              <Moon />
+              <span>Dark</span>
+              {mounted && theme === "dark" ? (
+                <Check className="ml-auto size-4" />
+              ) : null}
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onSelect={(event) => {
+                event.preventDefault();
+                setTheme("system");
+              }}
+              className="gap-2"
+            >
+              <Monitor />
+              <span>System</span>
+              {mounted && theme === "system" ? (
+                <Check className="ml-auto size-4" />
+              ) : null}
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
             <DropdownMenuItem
               onSelect={(event) => {
                 event.preventDefault();

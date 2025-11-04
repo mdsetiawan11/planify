@@ -33,8 +33,8 @@ import {
 const data = {
   navMain: [
     {
-      title: "Projects",
-      url: "#",
+      title: "Apps",
+      url: "/apps",
       icon: Settings2,
     },
     {
