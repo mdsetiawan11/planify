@@ -75,19 +75,20 @@ model Verification {
 // ======================================
 
 model Application {
-  id            String      @id @default(uuid())
-  name          String
-  description   String?
-  techStack     String?
-  repositoryUrl String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id              String      @id @default(uuid())
+  name            String
+  description     String?
+  techStack       String?
+  repositoryUrl   String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  deletedAt       DateTime?
+  deletedBy       String?
 
-  userId        String
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  meetings      Meeting[]
-  tasks         Task[]
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meetings        Meeting[]
+  tasks           Task[]
   applicationDocs ApplicationDoc[]
 
   @@map("application")
@@ -98,11 +99,14 @@ model Meeting {
   title         String
   description   String?
   meetingDate   DateTime?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
   startAt       DateTime
   endAt         DateTime
   color         String      @default("blue")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deletedAt     DateTime?
+  deletedBy     String?
+
   userId        String
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -119,6 +123,8 @@ model MeetingNote {
   content       String
   isConverted   Boolean     @default(false)
   createdAt     DateTime    @default(now())
+  deletedAt     DateTime?
+  deletedBy     String?
 
   meetingId     String
   meeting       Meeting     @relation(fields: [meetingId], references: [id], onDelete: Cascade)
@@ -129,25 +135,27 @@ model MeetingNote {
 }
 
 model Task {
-  id            String      @id @default(uuid())
-  title         String
-  description   String?
-  status        TaskStatus  @default(TODO)
-  startTime     DateTime?
-  endTime       DateTime?
-  branchName    String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id             String      @id @default(uuid())
+  title          String
+  description    String?
+  status         TaskStatus  @default(TODO)
+  startTime      DateTime?
+  endTime        DateTime?
+  branchName     String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?
+  deletedBy      String?
 
-  userId        String
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  applicationId String
-  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  applicationId  String
+  application    Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
-  meetingNoteId String?
-  meetingNote   MeetingNote? @relation(fields: [meetingNoteId], references: [id])
-  timeLogs      TimeLog[]
+  meetingNoteId  String?
+  meetingNote    MeetingNote? @relation(fields: [meetingNoteId], references: [id])
+  timeLogs       TimeLog[]
 
   @@map("task")
 }
@@ -158,6 +166,8 @@ model TimeLog {
   endAt           DateTime
   durationMinutes Int
   createdAt       DateTime  @default(now())
+  deletedAt       DateTime?
+  deletedBy       String?
 
   taskId          String
   task            Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
@@ -172,6 +182,8 @@ model ApplicationDoc {
   techStack       String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+  deletedAt       DateTime?
+  deletedBy       String?
 
   applicationId   String
   application     Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
@@ -196,6 +208,8 @@ model Diagram {
   description String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+  deletedBy   String?
 
   appDocId    String
   appDoc      ApplicationDoc @relation(fields: [appDocId], references: [id], onDelete: Cascade)
@@ -210,6 +224,8 @@ model ModuleDoc {
   relatedTaskIds String[]
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+  deletedAt     DateTime?
+  deletedBy     String?
 
   appDocId      String
   appDoc        ApplicationDoc @relation(fields: [appDocId], references: [id], onDelete: Cascade)
@@ -222,6 +238,8 @@ model NoteDoc {
   content     String
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+  deletedBy   String?
 
   appDocId    String
   appDoc      ApplicationDoc @relation(fields: [appDocId], references: [id], onDelete: Cascade)

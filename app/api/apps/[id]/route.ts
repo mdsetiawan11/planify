@@ -58,5 +58,5 @@ export async function DELETE(
     },
   });
 
-  return NextResponse.json(null, { status: 204 });
+  return NextResponse.json({ message: "Success" }, { status: 200 });
 }
