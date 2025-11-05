@@ -67,7 +67,7 @@ export default function layout({ children }: { children: React.ReactNode }) {
             </Breadcrumb>
           </div>
         </header>
-        {children}
+        <div className="px-5">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

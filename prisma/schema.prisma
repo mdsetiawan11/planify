@@ -100,7 +100,9 @@ model Meeting {
   meetingDate   DateTime?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-
+  startAt       DateTime
+  endAt         DateTime
+  color         String      @default("blue")
   userId        String
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 

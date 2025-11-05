@@ -33,13 +33,13 @@ import {
 const data = {
   navMain: [
     {
-      title: "Apps",
+      title: "App",
       url: "/apps",
       icon: Settings2,
     },
     {
-      title: "Calendar",
-      url: "/calendar",
+      title: "Meeting",
+      url: "/meeting",
       icon: CalendarDays,
       isActive: true,
     },
