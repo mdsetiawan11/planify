@@ -51,11 +51,11 @@ export async function DELETE(
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
   const param = await params;
-  await prisma.application.delete({
+  await prisma.application.update({
     where: {
       id: param.id,
-      userId: session.user.id,
     },
+    data: { deletedAt: new Date(), deletedBy: session.user.id },
   });
 
   return NextResponse.json({ message: "Success" }, { status: 200 });

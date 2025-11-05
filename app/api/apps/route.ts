@@ -17,7 +17,7 @@ export async function GET() {
   }
 
   const applications = await prisma.application.findMany({
-    where: { userId: session.user.id },
+    where: { userId: session.user.id, deletedAt: null },
     orderBy: { createdAt: "desc" },
   });
 
