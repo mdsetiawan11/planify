@@ -37,6 +37,10 @@ function generateEventDuration(): number {
 export function generateMockEvents(): CalendarEvent[] {
   const events: CalendarEvent[] = [];
   const startDate = startOfMonth(new Date());
+  const mockApplication = {
+    id: "mock-application-id",
+    name: "Sample Application",
+  };
 
   // Generate 120 events over 3 months
   for (let i = 0; i < 120; i++) {
@@ -54,6 +58,10 @@ export function generateMockEvents(): CalendarEvent[] {
       color: EVENT_COLORS[Math.floor(Math.random() * EVENT_COLORS.length)],
       start: startTime,
       end: endTime,
+      applicationId: mockApplication.id,
+      applicationName: mockApplication.name,
+      description: "",
+      meetingDate: startTime,
     });
   }
 

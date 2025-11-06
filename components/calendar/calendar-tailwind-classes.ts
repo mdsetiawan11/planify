@@ -66,4 +66,23 @@ export const colorOptions = [
       dark: 'dark:bg-emerald-700 dark:border-emerald-700 bg-emerald-700/10 text-emerald-700',
     },
   },
-]
+] as const
+
+export type CalendarColorOption = (typeof colorOptions)[number]
+export type CalendarColor = CalendarColorOption['value']
+
+const calendarColorValuesInternal = colorOptions.map((option) => option.value)
+
+export const calendarColorValues = calendarColorValuesInternal as CalendarColor[]
+export const calendarColorSet = new Set(calendarColorValuesInternal)
+
+export const isCalendarColor = (color: string): color is CalendarColor =>
+  calendarColorSet.has(color)
+
+export const normalizeCalendarColor = (
+  color?: string | null
+): CalendarColor => {
+  if (!color) return 'blue'
+  const value = color.toLowerCase()
+  return isCalendarColor(value) ? (value as CalendarColor) : 'blue'
+}

@@ -1,28 +1,28 @@
 import { CalendarContext } from './calendar-context'
-import { CalendarEvent, Mode } from './calendar-types'
+import type { CalendarEvent, CalendarProps } from './calendar-types'
 import { useState } from 'react'
 import CalendarNewEventDialog from './dialog/calendar-new-event-dialog'
 import CalendarManageEventDialog from './dialog/calendar-manage-event-dialog'
 
 export default function CalendarProvider({
-  events,
-  setEvents,
-  mode,
-  setMode,
-  date,
-  setDate,
-  calendarIconIsToday = true,
   children,
-}: {
-  events: CalendarEvent[]
-  setEvents: (events: CalendarEvent[]) => void
-  mode: Mode
-  setMode: (mode: Mode) => void
-  date: Date
-  setDate: (date: Date) => void
-  calendarIconIsToday: boolean
-  children: React.ReactNode
-}) {
+  ...props
+}: CalendarProps & { children: React.ReactNode }) {
+  const {
+    events,
+    setEvents,
+    mode,
+    setMode,
+    date,
+    setDate,
+    calendarIconIsToday = true,
+    applications,
+    isLoading = false,
+    createEvent,
+    updateEvent,
+    deleteEvent,
+  } = props
+
   const [newEventDialogOpen, setNewEventDialogOpen] = useState(false)
   const [manageEventDialogOpen, setManageEventDialogOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
@@ -37,6 +37,11 @@ export default function CalendarProvider({
         date,
         setDate,
         calendarIconIsToday,
+        applications,
+        isLoading,
+        createEvent,
+        updateEvent,
+        deleteEvent,
         newEventDialogOpen,
         setNewEventDialogOpen,
         manageEventDialogOpen,

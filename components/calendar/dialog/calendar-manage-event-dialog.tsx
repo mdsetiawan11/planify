@@ -1,13 +1,17 @@
+import { useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { useEffect } from 'react'
+import { format } from 'date-fns'
+import { toast } from 'sonner'
+
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import {
   Form,
@@ -18,9 +22,14 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { useCalendarContext } from '../calendar-context'
-import { format } from 'date-fns'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { DateTimePicker } from '@/components/form/date-time-picker'
 import { ColorPicker } from '@/components/form/color-picker'
 import {
@@ -34,6 +43,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { useCalendarContext } from '../calendar-context'
+import { normalizeCalendarColor } from '@/components/calendar/calendar-tailwind-classes'
 
 const formSchema = z
   .object({
@@ -45,6 +56,12 @@ const formSchema = z
       message: 'Invalid end date',
     }),
     color: z.string(),
+    applicationId: z.string().min(1, 'Application is required'),
+    description: z
+      .string()
+      .max(1000, 'Description must be 1000 characters or less')
+      .optional()
+      .nullable(),
   })
   .refine(
     (data) => {
@@ -68,9 +85,12 @@ export default function CalendarManageEventDialog() {
     setManageEventDialogOpen,
     selectedEvent,
     setSelectedEvent,
-    events,
-    setEvents,
+    applications,
+    updateEvent,
+    deleteEvent,
   } = useCalendarContext()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -79,6 +99,8 @@ export default function CalendarManageEventDialog() {
       start: '',
       end: '',
       color: 'blue',
+      applicationId: '',
+      description: '',
     },
   })
 
@@ -89,39 +111,68 @@ export default function CalendarManageEventDialog() {
         start: format(selectedEvent.start, "yyyy-MM-dd'T'HH:mm"),
         end: format(selectedEvent.end, "yyyy-MM-dd'T'HH:mm"),
         color: selectedEvent.color,
+        applicationId: selectedEvent.applicationId,
+        description: selectedEvent.description ?? '',
       })
     }
   }, [selectedEvent, form])
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!selectedEvent) return
 
-    const updatedEvent = {
-      ...selectedEvent,
-      title: values.title,
-      start: new Date(values.start),
-      end: new Date(values.end),
-      color: values.color,
-    }
+    setIsSubmitting(true)
+    try {
+      const payload = {
+        title: values.title.trim(),
+        start: new Date(values.start),
+        end: new Date(values.end),
+        color: normalizeCalendarColor(values.color),
+        applicationId: values.applicationId,
+        description:
+          values.description && values.description.length > 0
+            ? values.description
+            : null,
+      }
 
-    setEvents(
-      events.map((event) =>
-        event.id === selectedEvent.id ? updatedEvent : event
-      )
-    )
-    handleClose()
+      const updated = await updateEvent(selectedEvent.id, payload)
+
+      if (updated) {
+        setSelectedEvent({
+          ...updated,
+        })
+        toast.success('Meeting updated.')
+      }
+      handleClose()
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to update meeting.'
+      toast.error(message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!selectedEvent) return
-    setEvents(events.filter((event) => event.id !== selectedEvent.id))
-    handleClose()
+    setIsDeleting(true)
+    try {
+      await deleteEvent(selectedEvent.id)
+      toast.success('Meeting deleted.')
+      handleClose()
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to delete meeting.'
+      toast.error(message)
+      setIsDeleting(false)
+    }
   }
 
   function handleClose() {
     setManageEventDialogOpen(false)
     setSelectedEvent(null)
     form.reset()
+    setIsSubmitting(false)
+    setIsDeleting(false)
   }
 
   return (
@@ -188,11 +239,65 @@ export default function CalendarManageEventDialog() {
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="applicationId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-bold">Application</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    disabled={isSubmitting}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select application" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {applications.map((application) => (
+                        <SelectItem
+                          key={application.id}
+                          value={application.id}
+                        >
+                          {application.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-bold">Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Optional description (max 1000 characters)"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <DialogFooter className="flex justify-between gap-2">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" type="button">
-                    Delete
+                  <Button
+                    variant="destructive"
+                    type="button"
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete'}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -204,14 +309,21 @@ export default function CalendarManageEventDialog() {
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>
+                    <AlertDialogCancel disabled={isDeleting}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                    >
                       Delete
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-              <Button type="submit">Update event</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Updating...' : 'Update meeting'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

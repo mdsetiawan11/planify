@@ -15,6 +15,11 @@ export default function Calendar({
   date,
   setDate,
   calendarIconIsToday = true,
+  applications,
+  isLoading = false,
+  createEvent,
+  updateEvent,
+  deleteEvent,
 }: CalendarProps) {
   return (
     <CalendarProvider
@@ -25,6 +30,11 @@ export default function Calendar({
       date={date}
       setDate={setDate}
       calendarIconIsToday={calendarIconIsToday}
+      applications={applications}
+      isLoading={isLoading}
+      createEvent={createEvent}
+      updateEvent={updateEvent}
+      deleteEvent={deleteEvent}
     >
       <CalendarHeader>
         <CalendarHeaderDate />
