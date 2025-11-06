@@ -15,7 +15,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SerializedEditorState } from "lexical";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { use, useState } from "react";
 
 export const initialValue = {
   root: {
@@ -47,12 +47,23 @@ export const initialValue = {
   },
 } as unknown as SerializedEditorState;
 
-export default function NoteManage() {
+export default function NoteManage({
+  initialContent,
+}: {
+  initialContent?: string;
+}) {
   const [editorState, setEditorState] =
     useState<SerializedEditorState>(initialValue);
+
+  const [content, setContent] = useState<string>("");
+
+  const onSubmit = async () => {
+    console.log(content);
+  };
+
   return (
     <Dialog>
-      <form>
+      <form action={onSubmit}>
         <DialogTrigger asChild>
           <Button variant="default">
             <Plus /> New Note
@@ -63,10 +74,14 @@ export default function NoteManage() {
             <DialogTitle>Create Note</DialogTitle>
             <DialogDescription></DialogDescription>
           </DialogHeader>
-          <ScrollArea className="h-100">
+          <ScrollArea className="h-[500px]">
             <Editor
               editorSerializedState={editorState}
               onSerializedChange={(value) => setEditorState(value)}
+              AiEnabled={false}
+              onHtmlChange={(value) => {
+                setContent(value);
+              }}
             />
           </ScrollArea>
           <DialogFooter>
