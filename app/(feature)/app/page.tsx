@@ -1,20 +1,16 @@
 import prisma from "@/lib/prisma";
 
-import AppManage from "./app-manage";
-import { authClient } from "@/lib/auth-client";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import AppManage from "./app-manage";
 
 export default async function Page() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   if (!session) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        You must be signed in to manage applications.
-      </p>
-    );
+    redirect(`/auth/signin?callbackUrl=/app`);
   }
 
   const applications = await prisma.application.findMany({

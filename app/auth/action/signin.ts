@@ -48,10 +48,15 @@ export async function signin(
   const { email, password } = parsed.data;
 
   try {
+    const callbackUrl =
+      typeof formData.get("callbackUrl") === "string"
+        ? (formData.get("callbackUrl") as string)
+        : "/dashboard";
+
     const { error } = await authClient.signIn.email({
       email,
       password,
-      callbackURL: "/dashboard",
+      callbackURL: callbackUrl,
     });
 
     if (error) {

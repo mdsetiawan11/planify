@@ -34,7 +34,7 @@ const data = {
   navMain: [
     {
       title: "App",
-      url: "/apps",
+      url: "/app",
       icon: Settings2,
     },
     {
@@ -45,12 +45,12 @@ const data = {
     },
     {
       title: "Note",
-      url: "#",
+      url: "/note",
       icon: NotebookText,
     },
     {
       title: "Task",
-      url: "#",
+      url: "/Task",
       icon: BookOpen,
     },
   ],

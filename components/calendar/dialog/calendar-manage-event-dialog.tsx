@@ -1,18 +1,18 @@
-import { useEffect, useState } from 'react'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { format } from 'date-fns'
-import { toast } from 'sonner'
+import { useEffect, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { format } from "date-fns";
+import { toast } from "sonner";
 
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -20,18 +20,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { DateTimePicker } from '@/components/form/date-time-picker'
-import { ColorPicker } from '@/components/form/color-picker'
+} from "@/components/ui/select";
+import { DateTimePicker } from "@/components/form/date-time-picker";
+import { ColorPicker } from "@/components/form/color-picker";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,42 +42,42 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import { useCalendarContext } from '../calendar-context'
-import { normalizeCalendarColor } from '@/components/calendar/calendar-tailwind-classes'
+} from "@/components/ui/alert-dialog";
+import { useCalendarContext } from "../calendar-context";
+import { normalizeCalendarColor } from "@/components/calendar/calendar-tailwind-classes";
 
 const formSchema = z
   .object({
-    title: z.string().min(1, 'Title is required'),
+    title: z.string().min(1, "Title is required"),
     start: z.string().refine((val) => !isNaN(Date.parse(val)), {
-      message: 'Invalid start date',
+      message: "Invalid start date",
     }),
     end: z.string().refine((val) => !isNaN(Date.parse(val)), {
-      message: 'Invalid end date',
+      message: "Invalid end date",
     }),
     color: z.string(),
-    applicationId: z.string().min(1, 'Application is required'),
+    applicationId: z.string().min(1, "Application is required"),
     description: z
       .string()
-      .max(1000, 'Description must be 1000 characters or less')
+      .max(1000, "Description must be 1000 characters or less")
       .optional()
       .nullable(),
   })
   .refine(
     (data) => {
       try {
-        const start = new Date(data.start)
-        const end = new Date(data.end)
-        return end >= start
+        const start = new Date(data.start);
+        const end = new Date(data.end);
+        return end >= start;
       } catch {
-        return false
+        return false;
       }
     },
     {
-      message: 'End time must be after start time',
-      path: ['end'],
+      message: "End time must be after start time",
+      path: ["end"],
     }
-  )
+  );
 
 export default function CalendarManageEventDialog() {
   const {
@@ -88,21 +88,21 @@ export default function CalendarManageEventDialog() {
     applications,
     updateEvent,
     deleteEvent,
-  } = useCalendarContext()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  } = useCalendarContext();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      start: '',
-      end: '',
-      color: 'blue',
-      applicationId: '',
-      description: '',
+      title: "",
+      start: "",
+      end: "",
+      color: "blue",
+      applicationId: "",
+      description: "",
     },
-  })
+  });
 
   useEffect(() => {
     if (selectedEvent) {
@@ -112,15 +112,15 @@ export default function CalendarManageEventDialog() {
         end: format(selectedEvent.end, "yyyy-MM-dd'T'HH:mm"),
         color: selectedEvent.color,
         applicationId: selectedEvent.applicationId,
-        description: selectedEvent.description ?? '',
-      })
+        description: selectedEvent.description ?? "",
+      });
     }
-  }, [selectedEvent, form])
+  }, [selectedEvent, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!selectedEvent) return
+    if (!selectedEvent) return;
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       const payload = {
         title: values.title.trim(),
@@ -132,47 +132,47 @@ export default function CalendarManageEventDialog() {
           values.description && values.description.length > 0
             ? values.description
             : null,
-      }
+      };
 
-      const updated = await updateEvent(selectedEvent.id, payload)
+      const updated = await updateEvent(selectedEvent.id, payload);
 
       if (updated) {
         setSelectedEvent({
           ...updated,
-        })
-        toast.success('Meeting updated.')
+        });
+        toast.success("Meeting updated.");
       }
-      handleClose()
+      handleClose();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Failed to update meeting.'
-      toast.error(message)
+        error instanceof Error ? error.message : "Failed to update meeting.";
+      toast.error(message);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
   async function handleDelete() {
-    if (!selectedEvent) return
-    setIsDeleting(true)
+    if (!selectedEvent) return;
+    setIsDeleting(true);
     try {
-      await deleteEvent(selectedEvent.id)
-      toast.success('Meeting deleted.')
-      handleClose()
+      await deleteEvent(selectedEvent.id);
+      toast.success("Meeting deleted.");
+      handleClose();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Failed to delete meeting.'
-      toast.error(message)
-      setIsDeleting(false)
+        error instanceof Error ? error.message : "Failed to delete meeting.";
+      toast.error(message);
+      setIsDeleting(false);
     }
   }
 
   function handleClose() {
-    setManageEventDialogOpen(false)
-    setSelectedEvent(null)
-    form.reset()
-    setIsSubmitting(false)
-    setIsDeleting(false)
+    setManageEventDialogOpen(false);
+    setSelectedEvent(null);
+    form.reset();
+    setIsSubmitting(false);
+    setIsDeleting(false);
   }
 
   return (
@@ -257,10 +257,7 @@ export default function CalendarManageEventDialog() {
                     </FormControl>
                     <SelectContent>
                       {applications.map((application) => (
-                        <SelectItem
-                          key={application.id}
-                          value={application.id}
-                        >
+                        <SelectItem key={application.id} value={application.id}>
                           {application.name}
                         </SelectItem>
                       ))}
@@ -282,6 +279,7 @@ export default function CalendarManageEventDialog() {
                       placeholder="Optional description (max 1000 characters)"
                       rows={3}
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -297,7 +295,7 @@ export default function CalendarManageEventDialog() {
                     type="button"
                     disabled={isDeleting}
                   >
-                    {isDeleting ? 'Deleting...' : 'Delete'}
+                    {isDeleting ? "Deleting..." : "Delete"}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -322,12 +320,12 @@ export default function CalendarManageEventDialog() {
                 </AlertDialogContent>
               </AlertDialog>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Updating...' : 'Update meeting'}
+                {isSubmitting ? "Updating..." : "Update meeting"}
               </Button>
             </DialogFooter>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

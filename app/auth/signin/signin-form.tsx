@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useFormStatus } from "react-dom";
 
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -67,6 +68,14 @@ export function SigninForm({
         </CardHeader>
         <CardContent>
           <form action={formAction} noValidate>
+            {/* Pass through a callbackUrl query param so the action can redirect back */}
+            {(() => {
+              const params = useSearchParams();
+              const cb = params?.get("callbackUrl");
+              return cb ? (
+                <input type="hidden" name="callbackUrl" value={cb} />
+              ) : null;
+            })()}
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
