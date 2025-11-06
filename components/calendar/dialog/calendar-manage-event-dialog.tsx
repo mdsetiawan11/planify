@@ -179,7 +179,7 @@ export default function CalendarManageEventDialog() {
     <Dialog open={manageEventDialogOpen} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Manage event</DialogTitle>
+          <DialogTitle>Manage Meeting</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

@@ -1,28 +1,18 @@
 import { NextResponse } from "next/server";
 
 import prisma from "@/lib/prisma";
-import {
-  baseMeetingSchema,
-  getSession,
-  serializeMeeting,
-} from "../shared";
+import { baseMeetingSchema, getSession, serializeMeeting } from "../shared";
 import { normalizeCalendarColor } from "@/components/calendar/calendar-tailwind-classes";
 
 const updateMeetingSchema = baseMeetingSchema
-  .refine(
-    (value) => !value.startAt || value.endAt,
-    {
-      message: "End time is required when updating the start time",
-      path: ["endAt"],
-    }
-  )
-  .refine(
-    (value) => !value.endAt || value.startAt,
-    {
-      message: "Start time is required when updating the end time",
-      path: ["startAt"],
-    }
-  );
+  .refine((value) => !value.startAt || value.endAt, {
+    message: "End time is required when updating the start time",
+    path: ["endAt"],
+  })
+  .refine((value) => !value.endAt || value.startAt, {
+    message: "Start time is required when updating the end time",
+    path: ["startAt"],
+  });
 
 export async function PUT(
   request: Request,
@@ -33,7 +23,7 @@ export async function PUT(
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = params;
+  const { id } = await params;
 
   const existing = await prisma.meeting.findFirst({
     where: { id, userId: session.user.id, deletedAt: null },
@@ -50,7 +40,10 @@ export async function PUT(
 
   const body = await request.json().catch(() => null);
   if (!body) {
-    return NextResponse.json({ message: "Invalid JSON payload" }, { status: 400 });
+    return NextResponse.json(
+      { message: "Invalid JSON payload" },
+      { status: 400 }
+    );
   }
 
   const parsed = updateMeetingSchema.safeParse(body);
