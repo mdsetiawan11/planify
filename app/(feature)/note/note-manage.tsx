@@ -69,21 +69,21 @@ export default function NoteManage({
             <Plus /> New Note
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-7xl">
+        <DialogContent className="sm:max-w-7xl max-h-[85vh]">
           <DialogHeader>
             <DialogTitle>Create Note</DialogTitle>
             <DialogDescription></DialogDescription>
           </DialogHeader>
-          <ScrollArea className="h-[500px]">
-            <Editor
-              editorSerializedState={editorState}
-              onSerializedChange={(value) => setEditorState(value)}
-              AiEnabled={false}
-              onHtmlChange={(value) => {
-                setContent(value);
-              }}
-            />
-          </ScrollArea>
+
+          <Editor
+            editorSerializedState={editorState}
+            onSerializedChange={(value) => setEditorState(value)}
+            AiEnabled={false}
+            onHtmlChange={(value) => {
+              setContent(value);
+            }}
+          />
+
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>

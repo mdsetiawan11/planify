@@ -59,6 +59,24 @@ import { ToolbarPlugin } from "@/components/editor/plugins/toolbar/toolbar-plugi
 import { HR } from "@/components/editor/transformers/markdown-hr-transformer";
 import { IMAGE } from "@/components/editor/transformers/markdown-image-transformer";
 import { TABLE } from "@/components/editor/transformers/markdown-table-transformer";
+import { Separator } from "@/components/ui/separator";
+import { FontFamilyToolbarPlugin } from "@/components/editor/plugins/toolbar/font-family-toolbar-plugin";
+import { FontSizeToolbarPlugin } from "@/components/editor/plugins/toolbar/font-size-toolbar-plugin";
+import { SubSuperToolbarPlugin } from "@/components/editor/plugins/toolbar/subsuper-toolbar-plugin";
+import { ClearFormattingToolbarPlugin } from "@/components/editor/plugins/toolbar/clear-formatting-toolbar-plugin";
+import { FontColorToolbarPlugin } from "@/components/editor/plugins/toolbar/font-color-toolbar-plugin";
+import { FontBackgroundToolbarPlugin } from "@/components/editor/plugins/toolbar/font-background-toolbar-plugin";
+import { BlockInsertPlugin } from "@/components/editor/plugins/toolbar/block-insert-plugin";
+import { InsertImage } from "@/components/editor/plugins/toolbar/block-insert/insert-image";
+import { InsertHorizontalRule } from "@/components/editor/plugins/toolbar/block-insert/insert-horizontal-rule";
+import { InsertTable } from "@/components/editor/plugins/toolbar/block-insert/insert-table";
+import { InsertColumnsLayout } from "@/components/editor/plugins/toolbar/block-insert/insert-columns-layout";
+import { InsertEmbeds } from "@/components/editor/plugins/toolbar/block-insert/insert-embeds";
+import { ActionsPlugin } from "@/components/editor/plugins/actions/actions-plugin";
+import { MaxLengthPlugin } from "@/components/editor/plugins/actions/max-length-plugin";
+import { CounterCharacterPlugin } from "@/components/editor/plugins/actions/counter-character-plugin";
+import { ShareContentPlugin } from "@/components/editor/plugins/actions/share-content-plugin";
+import { MarkdownTogglePlugin } from "@/components/editor/plugins/actions/markdown-toggle-plugin";
 
 const placeholder = "Press / for commands...";
 
@@ -77,8 +95,9 @@ export function Plugins({}) {
     <div className="relative">
       <ToolbarPlugin>
         {({ blockType }) => (
-          <div className="vertical-align-middle sticky top-0 z-10 flex items-center gap-2 overflow-auto border-b p-1">
+          <div className="vertical-align-middle sticky top-0 z-10 flex items-center gap-2 overflow-auto border-b p-1 bg-background">
             <HistoryToolbarPlugin />
+            <Separator orientation="vertical" className="h-7!" />
             <BlockFormatDropDown>
               <FormatParagraph />
               <FormatHeading levels={["h1", "h2", "h3"]} />
@@ -92,13 +111,26 @@ export function Plugins({}) {
               <CodeLanguageToolbarPlugin />
             ) : (
               <>
-                <ElementFormatToolbarPlugin separator={false} />
+                <FontSizeToolbarPlugin />
+                <Separator orientation="vertical" className="!h-7" />
                 <FontFormatToolbarPlugin />
-                <LinkToolbarPlugin setIsLinkEditMode={setIsLinkEditMode} />
+                <Separator orientation="vertical" className="!h-7" />
 
-                <HorizontalRuleToolbarPlugin />
-                <ImageToolbarPlugin />
-                <TableToolbarPlugin />
+                <LinkToolbarPlugin setIsLinkEditMode={setIsLinkEditMode} />
+                <Separator orientation="vertical" className="!h-7" />
+                <ClearFormattingToolbarPlugin />
+                <Separator orientation="vertical" className="!h-7" />
+                <FontColorToolbarPlugin />
+                <FontBackgroundToolbarPlugin />
+                <Separator orientation="vertical" className="!h-7" />
+                <ElementFormatToolbarPlugin />
+                <Separator orientation="vertical" className="!h-7" />
+                <BlockInsertPlugin>
+                  <InsertHorizontalRule />
+                  <InsertImage />
+                  <InsertTable />
+                  <InsertColumnsLayout />
+                </BlockInsertPlugin>
               </>
             )}
           </div>
@@ -186,6 +218,34 @@ export function Plugins({}) {
           ]}
         />
       </div>
+      <ActionsPlugin>
+        <div className="clear-both flex items-center justify-between gap-2 overflow-auto border-t p-1">
+          <div className="flex flex-1 justify-start"></div>
+          <div>
+            <CounterCharacterPlugin charset="UTF-16" />
+          </div>
+          <div className="flex flex-1 justify-end">
+            <ShareContentPlugin />
+
+            <MarkdownTogglePlugin
+              shouldPreserveNewLinesInMarkdown={true}
+              transformers={[
+                TABLE,
+                HR,
+                IMAGE,
+
+                CHECK_LIST,
+                ...ELEMENT_TRANSFORMERS,
+                ...MULTILINE_ELEMENT_TRANSFORMERS,
+                ...TEXT_FORMAT_TRANSFORMERS,
+                ...TEXT_MATCH_TRANSFORMERS,
+              ]}
+            />
+
+            <></>
+          </div>
+        </div>
+      </ActionsPlugin>
     </div>
   );
 }
