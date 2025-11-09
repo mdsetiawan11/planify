@@ -3,22 +3,19 @@
 import * as React from "react";
 import {
   BookOpen,
-  Bot,
   CalendarDays,
   Command,
   Frame,
+  LayoutDashboard,
   LifeBuoy,
   Map,
   NotebookText,
   PieChart,
   Send,
   Settings2,
-  SquareTerminal,
 } from "lucide-react";
 
 import { NavMain } from "@/components/common/sidebar/nav-main";
-import { NavProjects } from "@/components/common/sidebar/nav-projects";
-import { NavSecondary } from "@/components/common/sidebar/nav-secondary";
 import { NavUser } from "@/components/common/sidebar/nav-user";
 import {
   Sidebar,
@@ -32,6 +29,11 @@ import {
 
 const data = {
   navMain: [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
+    },
     {
       title: "App",
       url: "/app",
@@ -107,8 +109,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        {/* <NavProjects projects={data.projects} /> */}
+        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
