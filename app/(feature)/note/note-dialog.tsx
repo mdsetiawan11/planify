@@ -35,7 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const formSchema = z.object({
   MeetingId: z.string().min(1, "Please select a meeting"),
@@ -74,6 +74,36 @@ export default function NoteDialog({
     },
   });
 
+  const queryClient = useQueryClient();
+
+  const createMeetingNote = async (data: {
+    MeetingId: string;
+    Content: string;
+  }) => {
+    const res = await fetch("/api/notes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to create meeting note");
+    }
+
+    return res.json();
+  };
+
+  const mutation = useMutation({
+    mutationFn: createMeetingNote,
+    onSuccess: () => {
+      // invalidate cache meeting notes agar refetch otomatis
+      queryClient.invalidateQueries({ queryKey: ["meetingNotes"] });
+      setOpen(false);
+    },
+  });
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
@@ -81,9 +111,7 @@ export default function NoteDialog({
         MeetingId: values.MeetingId,
         Content: content,
       };
-
-      console.log("Submitted:", JSON.stringify(formData));
-      // TODO: Kirim ke API
+      await mutation.mutateAsync(formData);
     } catch (err) {
       console.error("Error during create:", err);
     } finally {
@@ -157,14 +185,14 @@ export default function NoteDialog({
                         value={field.value}
                         onValueChange={field.onChange}
                       >
-                        <SelectTrigger className="w-[250px]">
+                        <SelectTrigger className="w-[500px]">
                           <SelectValue placeholder="Select Meeting" />
                         </SelectTrigger>
                         <SelectContent>
                           {meeting.map((item) => (
                             <SelectItem key={item.id} value={item.id}>
                               <span className="flex items-center gap-2 text-xs">
-                                {item.title}
+                                {item.title} ({item.application?.name})
                               </span>
                             </SelectItem>
                           ))}
