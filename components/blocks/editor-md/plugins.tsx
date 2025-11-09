@@ -78,7 +78,7 @@ import { CounterCharacterPlugin } from "@/components/editor/plugins/actions/coun
 import { ShareContentPlugin } from "@/components/editor/plugins/actions/share-content-plugin";
 import { MarkdownTogglePlugin } from "@/components/editor/plugins/actions/markdown-toggle-plugin";
 
-const placeholder = "Press / for commands...";
+const placeholder = "Hello World ...";
 
 export function Plugins({}) {
   const [floatingAnchorElem, setFloatingAnchorElem] =
