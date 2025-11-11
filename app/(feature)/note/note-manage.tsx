@@ -172,17 +172,14 @@ export default function NoteManage({
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span>Created {formatDate(note.createdAt)}</span>
-                            {note.isConverted && (
-                              <>
-                                <span>•</span>
-                                <Badge variant="outline" className="text-xs">
-                                  Converted
-                                </Badge>
-                              </>
-                            )}
                           </div>
                           <div className="flex items-center gap-2">
                             <NoteDetail note={note} />
+                            <NoteDialog
+                              mode="edit"
+                              userId={userId}
+                              note={note}
+                            />
                           </div>
                         </div>
                         <div

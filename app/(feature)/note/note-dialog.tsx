@@ -20,11 +20,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { IMeeting } from "@/types/app-interface";
+import { IMeeting, IMeetingNote } from "@/types/app-interface";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SerializedEditorState } from "lexical";
-import { LoaderCircleIcon, Plus } from "lucide-react";
-import { useState } from "react";
+import { Edit, LoaderCircleIcon, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { fetchMeetings } from "./actions";
@@ -36,7 +36,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { routerServerGlobal } from "next/dist/server/lib/router-utils/router-server-context";
 
 const formSchema = z.object({
   MeetingId: z.string().min(1, "Please select a meeting"),
@@ -46,10 +45,13 @@ const formSchema = z.object({
 export default function NoteDialog({
   userId,
   mode,
+  note,
 }: {
   userId: string;
   mode: string;
+  note?: IMeetingNote;
 }) {
+  console.log(note);
   const [editorState, setEditorState] = useState<SerializedEditorState>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [content, setContent] = useState<string>("");
@@ -64,16 +66,41 @@ export default function NoteDialog({
   } = useQuery<IMeeting[]>({
     queryKey: ["meetings", userId],
     queryFn: fetchMeetings,
-    enabled: !!userId && open, // hanya fetch saat modal terbuka
+    enabled: !!userId && open,
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      MeetingId: "",
-      Content: "",
+      MeetingId: mode === "create" ? "" : note?.meetingId || "",
+      Content: mode === "create" ? "" : note?.content || "",
     },
   });
+
+  // ✅ Initialize editor state when in edit mode
+  useEffect(() => {
+    if (mode === "edit" && note && open) {
+      form.reset({
+        MeetingId: note.meetingId || "",
+        Content: note.content || "",
+      });
+
+      setContent(note.content || "");
+
+      // If note.content is a serialized editor state, parse it
+      // Otherwise, you might need to convert HTML to editor state
+      try {
+        if (note.content) {
+          // If your content is stored as serialized editor state JSON
+          const parsed = JSON.parse(note.content);
+          setEditorState(parsed);
+        }
+      } catch (e) {
+        // If it's HTML or plain text, set it directly
+        setContent(note.content || "");
+      }
+    }
+  }, [mode, note, open, form]);
 
   const queryClient = useQueryClient();
 
@@ -99,7 +126,6 @@ export default function NoteDialog({
   const mutation = useMutation({
     mutationFn: createMeetingNote,
     onSuccess: () => {
-      // invalidate cache meeting notes agar refetch otomatis
       queryClient.invalidateQueries({ queryKey: ["meetingNotes"] });
       setOpen(false);
     },
@@ -139,7 +165,15 @@ export default function NoteDialog({
     >
       <DialogTrigger asChild>
         <Button variant="default">
-          <Plus /> New Note
+          {mode === "create" ? (
+            <>
+              <Plus /> New Note
+            </>
+          ) : (
+            <>
+              <Edit /> Edit
+            </>
+          )}
         </Button>
       </DialogTrigger>
 
@@ -150,7 +184,9 @@ export default function NoteDialog({
         }}
       >
         <DialogHeader>
-          <DialogTitle>Create Note</DialogTitle>
+          <DialogTitle>
+            {mode === "create" ? "Create Note" : "Edit Note"}
+          </DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
 
@@ -219,6 +255,7 @@ export default function NoteDialog({
                       onSerializedChange={(value) => setEditorState(value)}
                       AiEnabled={false}
                       onHtmlChange={(value) => setContent(value)}
+                      initialContent={mode == "edit" ? note?.content : ""}
                     />
                   </FormControl>
                   <FormMessage />

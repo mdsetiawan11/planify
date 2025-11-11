@@ -30,21 +30,8 @@ export default function NoteDetail({ note }: { note: IMeetingNote }) {
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Note Details</DialogTitle>
-          <DialogDescription>
-            Full content of the meeting note
-          </DialogDescription>
+          <DialogDescription></DialogDescription>
         </DialogHeader>
-
-        {/* Note Metadata */}
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span>Created {formatDate(note.createdAt)}</span>
-          {note.isConverted && (
-            <>
-              <span>•</span>
-              <Badge className="text-xs">Converted</Badge>
-            </>
-          )}
-        </div>
 
         {/* Note Content */}
         <div
