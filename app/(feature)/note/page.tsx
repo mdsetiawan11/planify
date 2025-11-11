@@ -16,6 +16,13 @@ export default async function Page() {
 
   const notes = (await prisma.meetingNote.findMany({
     orderBy: { createdAt: "desc" },
+    include: {
+      meeting: {
+        include: {
+          application: {},
+        },
+      },
+    },
   })) as IMeetingNote[];
 
   return <NoteManage initialData={notes} userId={session.user.id} />;
