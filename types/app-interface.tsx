@@ -15,7 +15,6 @@ export interface IUser {
   applications?: IApplication[];
   meetings?: IMeeting[];
   tasks?: ITask[];
-  applicationDocs?: IApplicationDoc[];
 }
 
 export interface ISession {
@@ -72,7 +71,6 @@ export interface IApplication {
   user?: IUser;
   meetings?: IMeeting[];
   tasks?: ITask[];
-  applicationDocs?: IApplicationDoc[];
 }
 
 export interface IMeeting {
@@ -94,6 +92,7 @@ export interface IMeeting {
 
 export interface IMeetingNote {
   id: string;
+  title: string;
   content: string;
   isConverted: boolean;
   createdAt: Date;
@@ -129,56 +128,6 @@ export interface ITimeLog {
   createdAt: Date;
   taskId: string;
   task?: ITask;
-}
-
-export interface IApplicationDoc {
-  id: string;
-  description?: string | null;
-  purpose?: string | null;
-  techStack?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  applicationId: string;
-  application?: IApplication;
-  userId: string;
-  user?: IUser;
-  diagrams?: IDiagram[];
-  modules?: IModuleDoc[];
-  notes?: INoteDoc[];
-}
-
-export interface IDiagram {
-  id: string;
-  type: IDiagramType;
-  title: string;
-  fileUrl?: string | null;
-  diagramData?: any;
-  version: number;
-  description?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  appDocId: string;
-  appDoc?: IApplicationDoc;
-}
-
-export interface IModuleDoc {
-  id: string;
-  name: string;
-  description?: string | null;
-  relatedTaskIds: string[];
-  createdAt: Date;
-  updatedAt: Date;
-  appDocId: string;
-  appDoc?: IApplicationDoc;
-}
-
-export interface INoteDoc {
-  id: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-  appDocId: string;
-  appDoc?: IApplicationDoc;
 }
 
 // ========================

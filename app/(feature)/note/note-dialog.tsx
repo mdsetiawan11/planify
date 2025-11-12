@@ -26,7 +26,7 @@ import { SerializedEditorState } from "lexical";
 import { Edit, LoaderCircleIcon, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { file, z } from "zod";
 import { fetchMeetings } from "./actions";
 import {
   Select,
@@ -36,9 +36,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
   MeetingId: z.string().min(1, "Please select a meeting"),
+  Title: z.string(),
   Content: z.string(),
 });
 
@@ -73,6 +75,7 @@ export default function NoteDialog({
     resolver: zodResolver(formSchema),
     defaultValues: {
       MeetingId: mode === "create" ? "" : note?.meetingId || "",
+      Title: mode === "create" ? "" : note?.title || "",
       Content: mode === "create" ? "" : note?.content || "",
     },
   });
@@ -82,6 +85,7 @@ export default function NoteDialog({
     if (mode === "edit" && note && open) {
       form.reset({
         MeetingId: note.meetingId || "",
+        Title: note.title || "",
         Content: note.content || "",
       });
 
@@ -106,6 +110,7 @@ export default function NoteDialog({
 
   const createMeetingNote = async (data: {
     MeetingId: string;
+    Title: string;
     Content: string;
   }) => {
     const res = await fetch("/api/notes", {
@@ -136,6 +141,7 @@ export default function NoteDialog({
     try {
       const formData = {
         MeetingId: values.MeetingId,
+        Title: values.Title,
         Content: content,
       };
       await mutation.mutateAsync(formData);
@@ -236,6 +242,20 @@ export default function NoteDialog({
                         </SelectContent>
                       </Select>
                     )}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="Content"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

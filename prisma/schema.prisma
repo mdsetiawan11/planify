@@ -21,7 +21,6 @@ model User {
   applications   Application[]
   meetings       Meeting[]
   tasks          Task[]
-  applicationDocs ApplicationDoc[]
 
   @@map("user")
 }
@@ -89,7 +88,7 @@ model Application {
   user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   meetings        Meeting[]
   tasks           Task[]
-  applicationDocs ApplicationDoc[]
+
 
   @@map("application")
 }
@@ -120,6 +119,7 @@ model Meeting {
 
 model MeetingNote {
   id            String      @id @default(uuid())
+  title         String
   content       String
   isConverted   Boolean     @default(false)
   createdAt     DateTime    @default(now())
@@ -175,77 +175,7 @@ model TimeLog {
   @@map("time_log")
 }
 
-model ApplicationDoc {
-  id              String      @id @default(uuid())
-  description     String?
-  purpose         String?
-  techStack       String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  deletedAt       DateTime?
-  deletedBy       String?
 
-  applicationId   String
-  application     Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-
-  userId          String
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  diagrams        Diagram[]
-  modules         ModuleDoc[]
-  notes           NoteDoc[]
-
-  @@map("application_doc")
-}
-
-model Diagram {
-  id          String      @id @default(uuid())
-  type        DiagramType
-  title       String
-  fileUrl     String?
-  diagramData Json?
-  version     Int         @default(1)
-  description String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  deletedAt   DateTime?
-  deletedBy   String?
-
-  appDocId    String
-  appDoc      ApplicationDoc @relation(fields: [appDocId], references: [id], onDelete: Cascade)
-
-  @@map("diagram")
-}
-
-model ModuleDoc {
-  id            String      @id @default(uuid())
-  name          String
-  description   String?
-  relatedTaskIds String[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  deletedAt     DateTime?
-  deletedBy     String?
-
-  appDocId      String
-  appDoc        ApplicationDoc @relation(fields: [appDocId], references: [id], onDelete: Cascade)
-
-  @@map("module_doc")
-}
-
-model NoteDoc {
-  id          String      @id @default(uuid())
-  content     String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  deletedAt   DateTime?
-  deletedBy   String?
-
-  appDocId    String
-  appDoc      ApplicationDoc @relation(fields: [appDocId], references: [id], onDelete: Cascade)
-
-  @@map("note_doc")
-}
 
 // ========================
 // ENUMS

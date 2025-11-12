@@ -52,7 +52,7 @@ const data = {
     },
     {
       title: "Task",
-      url: "/Task",
+      url: "/task",
       icon: BookOpen,
     },
   ],

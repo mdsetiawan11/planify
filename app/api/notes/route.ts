@@ -53,6 +53,7 @@ export async function POST(request: Request) {
   const meeting = await prisma.meetingNote.create({
     data: {
       meetingId: body.MeetingId,
+      title: body.Title,
       content: body.Content,
     },
   });
