@@ -1,15 +1,9 @@
-import { headers } from "next/headers";
 import { z } from "zod";
 
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/api-utils";
 import type { Prisma } from "@/app/generated/prisma/client";
 
-export const getSession = async () => {
-  const result = await auth.api.getSession({
-    headers: await headers(),
-  });
-  return result ?? null;
-};
+export { getSession };
 
 export const taskStatusValues = ["TODO", "IN_PROGRESS", "DONE"] as const;
 export type TaskStatusValue = (typeof taskStatusValues)[number];

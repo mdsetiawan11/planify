@@ -1,7 +1,6 @@
-import { headers } from "next/headers";
 import { z } from "zod";
 
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/api-utils";
 import {
   normalizeCalendarColor,
   isCalendarColor,
@@ -9,12 +8,7 @@ import {
 } from "@/components/calendar/calendar-tailwind-classes";
 import type { Prisma } from "@/app/generated/prisma/client";
 
-export const getSession = async () => {
-  const result = await auth.api.getSession({
-    headers: await headers(),
-  });
-  return result ?? null;
-};
+export { getSession };
 
 export type MeetingWithApplication = Prisma.MeetingGetPayload<{
   include: {

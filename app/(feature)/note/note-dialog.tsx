@@ -39,9 +39,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
-  MeetingId: z.string().min(1, "Please select a meeting"),
-  Title: z.string(),
-  Content: z.string(),
+  meetingId: z.string().min(1, "Please select a meeting"),
+  title: z.string(),
+  content: z.string(),
 });
 
 export default function NoteDialog({
@@ -74,9 +74,9 @@ export default function NoteDialog({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      MeetingId: mode === "create" ? "" : note?.meetingId || "",
-      Title: mode === "create" ? "" : note?.title || "",
-      Content: mode === "create" ? "" : note?.content || "",
+      meetingId: mode === "create" ? "" : note?.meetingId || "",
+      title: mode === "create" ? "" : note?.title || "",
+      content: mode === "create" ? "" : note?.content || "",
     },
   });
 
@@ -84,9 +84,9 @@ export default function NoteDialog({
   useEffect(() => {
     if (mode === "edit" && note && open) {
       form.reset({
-        MeetingId: note.meetingId || "",
-        Title: note.title || "",
-        Content: note.content || "",
+        meetingId: note.meetingId || "",
+        title: note.title || "",
+        content: note.content || "",
       });
 
       setContent(note.content || "");
@@ -109,9 +109,9 @@ export default function NoteDialog({
   const queryClient = useQueryClient();
 
   const createMeetingNote = async (data: {
-    MeetingId: string;
-    Title: string;
-    Content: string;
+    meetingId: string;
+    title: string;
+    content: string;
   }) => {
     const res = await fetch("/api/notes", {
       method: "POST",
@@ -140,9 +140,9 @@ export default function NoteDialog({
     setIsSubmitting(true);
     try {
       const formData = {
-        MeetingId: values.MeetingId,
-        Title: values.Title,
-        Content: content,
+        meetingId: values.meetingId,
+        title: values.title,
+        content: content,
       };
       await mutation.mutateAsync(formData);
     } catch (err) {
@@ -201,7 +201,7 @@ export default function NoteDialog({
             {/* ✅ Meeting Selection */}
             <FormField
               control={form.control}
-              name="MeetingId"
+              name="meetingId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Meeting</FormLabel>
@@ -250,7 +250,7 @@ export default function NoteDialog({
 
             <FormField
               control={form.control}
-              name="Content"
+              name="title"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Title</FormLabel>
@@ -265,7 +265,7 @@ export default function NoteDialog({
             {/* ✅ Note Editor */}
             <FormField
               control={form.control}
-              name="Content"
+              name="content"
               render={() => (
                 <FormItem>
                   <FormLabel>Note</FormLabel>

@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 import prisma from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getSession } from "@/lib/api-utils";
 
-const getSession = async () => {
-  const result = await auth.api.getSession({
-    headers: await headers(),
-  });
-  return result ?? null;
-};
+const createNoteSchema = z.object({
+  meetingId: z.string().trim().min(1, "Meeting ID is required"),
+  title: z.string().trim().min(1, "Title is required"),
+  content: z.string().trim().min(1, "Content is required"),
+});
 
 export async function GET() {
   const session = await getSession();
@@ -31,6 +30,14 @@ export async function GET() {
   const meetingsIds = meetings.map((e) => e.id);
   const meetingNote = await prisma.meetingNote.findMany({
     where: { meetingId: { in: meetingsIds } },
+    include: {
+      meeting: {
+        include: {
+          application: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
   });
 
   return NextResponse.json(meetingNote);
@@ -50,13 +57,40 @@ export async function POST(request: Request) {
     );
   }
 
-  const meeting = await prisma.meetingNote.create({
-    data: {
-      meetingId: body.MeetingId,
-      title: body.Title,
-      content: body.Content,
+  const parsed = createNoteSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { message: "Validation failed", errors: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+
+  const { meetingId, title, content } = parsed.data;
+
+  // Verify meeting belongs to user's application
+  const meeting = await prisma.meeting.findFirst({
+    where: {
+      id: meetingId,
+      application: {
+        userId: session.user.id,
+      },
     },
   });
 
-  return NextResponse.json(meeting, { status: 201 });
+  if (!meeting) {
+    return NextResponse.json(
+      { message: "Meeting not found or unauthorized" },
+      { status: 404 }
+    );
+  }
+
+  const note = await prisma.meetingNote.create({
+    data: {
+      meetingId,
+      title,
+      content,
+    },
+  });
+
+  return NextResponse.json(note, { status: 201 });
 }
